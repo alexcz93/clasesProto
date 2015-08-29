@@ -12,6 +12,7 @@ package
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
 	import Utils.start.DStarling;
+	import Utils.time.DTempo;
 	/**
 	 * ...
 	 * @author Alexander Campos
@@ -21,6 +22,8 @@ package
 		
 		private var cont:int = 0;
 		private var timer:Timer;
+		private var monster:int;
+		private var elapsed:Number;
 		
 		public function Game() 
 		{
@@ -36,44 +39,51 @@ package
 		public function start():void
 		{
 			
-			timer = new Timer(1000);
+			/*timer = new Timer(1000);
 			timer.addEventListener(TimerEvent.TIMER, onTimer);
-			timer.start();
+			timer.start();*/
+			stage.addEventListener(Event.ENTER_FRAME, loop)
 			var bc:Image = new Image(DStarling.assetsManager.getTexture("scene1"));
 			addChild(bc);
 			stage.addEventListener(TouchEvent.TOUCH, onTouch);
+			monster = 0;
+			elapsed = 0;
+			DTempo.init();
+			
 			
 			
 		}
 		
-		private function onTimer(e:TimerEvent):void 
+		private function loop(e:Event):void
 		{
-			
-			if (timer.currentCount % 4 == 0) 
+			DTempo.update();
+			elapsed += DTempo.dt;
+			if (elapsed >= 1)
 			{
-				var Coin:Image = new Image(DStarling.assetsManager.getTexture("coin"));
-				addChild(Coin);
+				elapsed = 0;
 				
-				Coin.x = Math.random() * stage.stageWidth;
-				Coin.y = Math.random() * stage.stageHeight;
-				
-				
-				Coin.name = 'coin';
-			}
-			else
-			{
-				var mc:MovieClip = new MovieClip(DStarling.assetsManager.getTextures("walk00"));
-			addChild(mc);
+				if (monster > 1 && monster % 4 == 0)
+				{
+					var Coin:Image = new Image(DStarling.assetsManager.getTexture("coin"));
+					addChild(Coin);
+					Coin.x = Math.random() * stage.stageWidth;
+					Coin.y = Math.random() * stage.stageHeight;
+					Coin.name = 'coin';
+					monster = 0;
+				}else
+				{
+					var mc:MovieClip = new MovieClip(DStarling.assetsManager.getTextures("walk00"));
+					addChild(mc);
 	
-			mc.x = Math.random() * stage.stageWidth;
-			mc.y = Math.random() * stage.stageHeight;
-			Starling.juggler.add(mc);
-			mc.name = 'green';
+					mc.x = Math.random() * stage.stageWidth;
+					mc.y = Math.random() * stage.stageHeight;
+					Starling.juggler.add(mc);
+					mc.name = 'green';
+					monster++;
+				}
 			}
-			
-			
+			trace("delta" + DTempo.dt);
 		}
-		
 	
 		
 		private function onTouch(e:TouchEvent):void 
